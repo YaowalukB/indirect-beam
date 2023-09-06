@@ -56,25 +56,34 @@ charge_density = len(x_part) * electron_charge / 1 # Linear charge density per 1
 
 
 # ############################ Analytic eq.12(round beam) ##################
+# ##################### Gaussian Particle generation ###############################
+mean = 0  # Assuming centered at origin
+sigmaeq12 = R_charge_y / 2  #standard deviation of the gaussian distribution
+x_parteq12 = np.random.normal(mean, sigma, N_part_gen)
+y_parteq12 = np.random.normal(mean, sigma, N_part_gen)
+
+mask_keep = x_part**2 + y_part**2 < R_cham_y**2
+x_parteq12 = x_part[mask_keep]
+y_parteq12 = y_part[mask_keep]
+
+x_probeseq12 = np.linspace(-R_cham_x, R_cham_x, 1000)
+y_probeseq12 = np.zeros_like(x_probes)
+charge_density = len(x_part) * electron_charge / 1 # Linear charge density per 1 meter
+
 def electric_field_roundbeam(x, y):  
    n = charge_density
    r2 = x**2 + y**2
    e = electron_charge
    B = 0
-   sigma = sigma_x
+   sigma = sigmaeq12
    return ((n * e**2 * (1 + B**2) / (2 * np.pi * eps0)) * (np.array([x, y]) / r2) * (1 - np.exp(-r2 / (2 * sigma**2))))/e**2
 
 Ex_eq12 = []
 Ey_eq12 = []
-for x, y in zip(x_probes, y_probes):
+for x, y in zip(x_probeseq12, y_probeseq12):
     Ex, Ey = electric_field_roundbeam(x, y)
     Ex_eq12.append(Ex)
     Ey_eq12.append(Ey)
-
-# linearization of the analytic integral near the origin
-x_near_org = np.linspace(-R_charge_x, R_charge_x, 10000)
-y_near_org = np.zeros_like(x_near_org)
-E_near_origin =  (charge_density / ((2 * np.pi * eps0) * (sigma_u * (sigma_x + sigma_y)))) * x_near_org
 
 
 # ############################### BASSETTI-ERSKEIN ####################################
@@ -113,25 +122,25 @@ fig = plt.figure(figsize=(8, 4))
 # First plot (Electric field)
 ax0 = plt.subplot(1, 2, 1)
 #ax0.plot(x_near_org, E_near_origin, label='Linearization', color='black')
-ax0.plot(x_probes, E_x_B, label='Bassetti_Erskine', color='green')
-ax0.plot(x_probes, Ex_eq12, label='Round beam', color = 'blue')
+ax0.plot(x_probes, E_x_B, label='Bassetti-Erskine (elliptic)', color='lightgreen')
+ax0.plot(x_probes, Ex_eq12, label='analytic (round beam)', color = 'blue')
 ax0.plot(x_probes, Ex_FFT, label='FFT-open boundary', color='red', linestyle='--')
 ax0.set_xlim([-R_cham_x-0.01, R_cham_x+0.01])
 ax0.legend(loc='lower right', fontsize=9)
 ax0.set_ylabel('Ex on the x axis [V/m]')
 ax0.set_xlabel('x [m]')
-ax0.set_title('Gaussian distribution at y=0:\nFFT , Round beam, Basetti-Erskein')
+ax0.set_title('Gaussian distribution at y=0:\nFFT , Round beam, Basetti-Erskine')
 
 # Second plot (Chamber boundary and particle distribution)
 ax1 = plt.subplot(1, 2, 2)
 ax1.scatter(x_part, y_part, s=0.5, label='charged particles')
 ax1.set_xlim([-R_cham_x-0.01, R_cham_x+0.01])
-ax1.set_ylim([-R_cham_y-0.01, R_cham_y+0.01])
+ax1.set_ylim(plt.xlim())
 ax1.set_title('Particle distribution')
 ax1.legend(loc='lower right', fontsize=9)
 ax1.set_xlabel('x [m]')
 ax1.set_ylabel('y [m]')
 
 plt.tight_layout()
-#plt.savefig('Gaussian_Bassetti_Erskine.png')
+plt.savefig('Gaussian_Bassetti_Erskine.png')
 plt.show()

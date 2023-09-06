@@ -28,7 +28,7 @@ eps0 = epsilon_0
 chamber = ell.ellip_cham_geom_object(x_aper=R_cham, y_aper=R_cham)
 
 
-# ##################### Particle generation ###############################
+# ##################### Gaussian Particle generation ###############################
 mean = 0  # Assuming centered at origin
 sigma = R_charge / 2  #standard deviation of the gaussian distribution
 x_part = np.random.normal(mean, sigma, N_part_gen)
@@ -42,6 +42,18 @@ nel_part = np.ones_like(x_part)
 x_probes = np.linspace(-R_cham, R_cham, 1000)
 y_probes = np.zeros_like(x_probes)
 charge_density = len(x_part) * electron_charge / 1 # Linear charge density per 1 meter
+
+# ##################### Uniform Particle generation ###############################
+theta = 2 * np.pi * np.random.random(N_part_gen)        
+r = np.sqrt(np.random.random(N_part_gen)) * R_charge    
+x_parts = r * np.cos(theta)                 
+y_parts = r * np.sin(theta)
+mask_keep = x_parts**2 + y_parts**2 < R_cham**2
+x_parts = x_parts[mask_keep]
+y_parts = y_parts[mask_keep]
+
+# ################## Analytical (using simple Gauss's law)  ###############
+E_r_thx = [np.sum(x_parts**2 + y_parts**2 < x**2) * electron_charge / eps0 / (2 * np.pi * x) for x in x_probes]
 
 
 # ############################ Analytic eq.12(round beam) ##################
@@ -77,8 +89,9 @@ fig = plt.figure(figsize=(8, 4))
 # First plot (Electric field)
 ax0 = plt.subplot(1, 2, 1)
 ax0.plot(x_near_org, E_near_origin, label='Linearization', color='black')
-ax0.plot(x_probes, Ex_eq12, label='Round beam', color = 'blue')
+ax0.plot(x_probes, Ex_eq12, label='analytic (round beam)', color = 'blue')
 ax0.plot(x_probes, Ex_FFT, label='FFT-open boundary', color='red', linestyle='--')
+ax0.plot(x_probes, E_r_thx, label="Analytic uniform distribution", color='lightgreen', linestyle='--')
 ax0.set_xlim([-R_cham-0.01, R_cham+0.01])
 ax0.legend(loc='lower right', fontsize=9)
 ax0.set_ylabel('Ex on the x axis [V/m]')
@@ -96,5 +109,5 @@ ax1.set_xlabel('x [m]')
 ax1.set_ylabel('y [m]')
 
 plt.tight_layout()
-#plt.savefig('Gaussian_FFT_analytic_linearization.png')
+plt.savefig('Gaussian_FFT_analytic_linearization.png')
 plt.show()
