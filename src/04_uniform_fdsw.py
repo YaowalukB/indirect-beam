@@ -35,7 +35,7 @@ chamber = ell.ellip_cham_geom_object(x_aper=R_cham_x, y_aper=R_cham_y)
 
 
 # ##################### Particle generation ###############################
-y_offset = 0
+y_offset = 0.04
 x_part = np.random.uniform(-R_charge_x, R_charge_x, N_part_gen)
 y_part = np.random.uniform(-R_charge_y + y_offset, R_charge_y + y_offset, N_part_gen)
 mask_keep = (x_part**2 / R_charge_x**2) + ((y_part - y_offset)**2 / R_charge_y**2) < 1
@@ -48,51 +48,53 @@ y_probes = np.full(1000, y_offset)
 
 
 # ################## Analytical (using simple Gauss's law) ###############
-E_r_thx = [-np.sum(x_part**2 + (y_part - y_offset)**2 < x**2) * electron_charge / eps0 / (2 * np.pi * x) for x in x_probes]
+E_r_thx = [np.sum(x_part**2 + (y_part - y_offset)**2 < x**2) * electron_charge / eps0 / (2 * np.pi * x) for x in x_probes]
 
 
 # ############################### FFT ####################################
 picFFT = PIC_FFT.FFT_OpenBoundary(x_aper=chamber.x_aper, y_aper=chamber.y_aper, dx=Dh/2, dy=Dh, fftlib='pyfftw')
-picFFT.scatter(x_part, y_part, nel_part)
+picFFT.scatter(x_part, y_part, nel_part, charge=e)
 picFFT.solve()
 Ex_FFT, Ey_FFT = picFFT.gather(x_probes, y_probes)
 
 
 # ####################### FD Shortley-Weller #############################
 picFDSW = PIC_FDSW.FiniteDifferences_ShortleyWeller_SquareGrid(chamb=chamber, Dh=Dh)
-picFDSW.scatter(x_part, y_part, nel_part)
+picFDSW.scatter(x_part, y_part, nel_part, charge=e)
 picFDSW.solve()
 Ex_FDSW, Ey_FDSW = picFDSW.gather(x_probes, y_probes)
 
 
 # #################### Visualization #######################
-fig = plt.figure(figsize=(8, 6))
+fig = plt.figure(figsize=(8, 4))
 boundary_x = R_cham_x
 
 # First plot (Electric field)
-ax0 = plt.subplot(2, 1, 1)  # 2 rows, 1 column, first subplot
-ax0.axvline(boundary_x, color='red', linestyle='--', label='Boundary')
-ax0.axvline(-boundary_x, color='red', linestyle='--')
-ax0.plot(x_probes, Ex_FFT, label='FFT', color='purple')
-ax0.plot(x_probes, Ex_FDSW, label='FD ShortleyWeller', color='blue')
-ax0.plot(x_probes, E_r_thx, label = 'Analytical integral', color='green')
+ax0 = plt.subplot(1, 2, 1)  # 2 rows, 1 column, first subplot
+ax0.axvline(boundary_x, color='grey', linestyle=(0, (1, 1)), label='Boundary')
+ax0.axvline(-boundary_x, color='grey', linestyle=(0, (1, 1)))
+ax0.plot(x_probes, Ex_FDSW, label='FD-closed boundary', color='blue')
+ax0.plot(x_probes, Ex_FFT, label='FFT-open boundary', color='red', linestyle='--')
 ax0.set_xlim([-R_cham_x-0.01, R_cham_x+0.01])
-ax0.legend(loc='upper right')
-ax0.set_ylabel('Ex on the x axis [V/m]')
-ax0.set_title('FFT vs analytic: Gaussian charge')
+ax0.legend(loc='lower right', fontsize=9)
+ax0.set_ylabel('Ex [V/m]')
+ax0.set_xlabel('x [m]')
+ax0.set_title('Uniform distribution at y=0\nopen vs. closed boundary approaches')
 
 # Second plot (Chamber boundary and particle distribution)
-ax1 = plt.subplot(2, 1, 2)  # 2 rows, 1 column, second subplot
-ellipse = patches.Ellipse((0,0), 2*R_cham_x, 2*R_cham_y, fill=False, color='black', linestyle='-', label="Chamber boundary")
+ax1 = plt.subplot(1, 2, 2)  # 2 rows, 1 column, second subplot
+ellipse = patches.Ellipse((0,-y_offset), 2*R_cham_x, 2*R_cham_y, fill=False, color='black', linestyle='-', label=f"Vacuum pipe boundary\nat y_offset=-{y_offset}")
 ax1.add_patch(ellipse)
-ax1.axhline(y_offset, color='black', linestyle='--', label=f"y_offset= {y_offset}")
-ax1.scatter(x_part, y_part, s=0.5, label='charged particles')
+ax1.axhline(0, color='grey', linestyle=(0, (3, 1)), label='y = 0 (Field computation line)')
+ax1.scatter(x_part, y_part-y_offset, s=0.5, label='Charged particles')
 ax1.set_xlim([-R_cham_x-0.01, R_cham_x+0.01])
-ax1.set_ylim([-R_cham_y-0.01, R_cham_y+0.01])
+ax1.set_ylim([-R_cham_y-0.01-y_offset, R_cham_y+0.01-y_offset])
 ax1.set_title('Particle distribution')
-ax1.legend(loc='upper right')
+ax1.legend(loc='lower right', fontsize=9)
 ax1.set_xlabel('x [m]')
 ax1.set_ylabel('y [m]')
 
 plt.tight_layout()
+#plt.savefig('Uniform_yoffset_OpenVsClosed.png')
+#plt.savefig('Uniform_y0_OpenVsClosed.png')
 plt.show()
