@@ -3,18 +3,17 @@
 ## Description:
 This repository contains all the work completed during the summer school on the study of charged particle distribution. The primary focus was on the perpendicular side relative to the beam's travel direction.
 
+## Archived Versions
+- [Version v1.0.0 10.5281/zenodo.8322384](<https://zenodo.org/record/8322384>)
+  
 ## Dependencies:
 - **PyPIC:** The main package used for various particle-in-cell operations.
   - Modules: FiniteDifferences_ShortleyWeller_SquareGrid, FFT_OpenBoundary, geom_impact_ellip, and more.
-  
-- **numpy:** Utilized for numerical operations.
-
+- **numpy:** Utilized for mathematical operations.
 - **scipy:** Required for constants and various other functionalities.
-
 - **matplotlib:** Deployed for plotting and visualization.
 
 ## Project steps & associated code:
-
 0. **Initialization and setup**
    - Description: Setting up the necessary environment, libraries, and tools.
 
@@ -27,7 +26,7 @@ This repository contains all the work completed during the summer school on the 
    - [View result](./results/01_1.png)
 
 2. **Electric field analysis of Gaussian charge distribution**
-   - Approach: FFT open-boundary and analytical.
+   - Approach: FFT open-boundary and analytical(Round beam).
    - Specifics:
      - Gaussian distribution had a standard deviation half of the uniform disk charge.
      - The Gaussian distribution in this step utilizes the same standard deviation (sigma) for both x and y axes, making it symmetric.
@@ -47,7 +46,7 @@ This repository contains all the work completed during the summer school on the 
 
 
 4. **Electric field study using FDSW on uniform charge distribution**
-   - Approach: Shortley-Weller finite difference method (FDSW).
+   - Approach: Shortley-Weller finite difference method (FDSW) and FFT.
    - [view code](./src/04_uniform_fdsw.py)
    - [View result](./results/04_1.png)
    - **Notes:**
@@ -58,14 +57,17 @@ This repository contains all the work completed during the summer school on the 
      - Introduced `y_offset` to adjust the vertical position of the charge distribution's origin, aiming to gain insights into the boundary effects on the field.
 
 5. **Electric field study using FDSW on Gaussian charge distribution**
-   - Approach: Shortley-Weller finite difference method (FDSW).
+   - Approach: Shortley-Weller finite difference method (FDSW) and FFT.
    - Specifics: Gaussian distribution with a standard deviation half of the uniform disk charge.
    - Other setup are the same as 4.
    - [view code](./src/05_gaussian_fdsw.py)
    - [View result](./results/05_1.png)
 
-6. **Electric field from force of round beams on single test particle**
-   - Approach: Simplifying assumption of round beams.
-   - Specifics: Applied to Gaussian charge distribution with standard deviation half of the uniform disk charge.
-   - [view code](./src/06_gaussian_round_beam_force.py)
-   - [View result](./results/06_1.png)
+## Project Report 📄
+A comprehensive report detailing the methodologies, findings, and conclusions of the summer school project has been included in this repository.
+
+- **File Name**: `Report.pdf`
+- **Project title**: Electric Field Computation from Particle Distributions: A Study of Boundary Effects
+- **Project abstract**: This study examines the influence of boundaries on electric fields arising from uniform and Gaussian particle distributions within accelerators like the SIS100 at FAIR. Initial investigations were conducted without considering boundaries, progressing to scenarios that incorporate boundary considerations. Findings highlight computational challenges in Gaussian distributions and emphasize the importance of symmetrical configurations in bounded settings. The research underscores the necessity for efficient field computation methods in real-world accelerator contexts.
+- **Direct Link**: [Click here to view the full report](./Report.pdf)
+
