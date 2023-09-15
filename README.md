@@ -4,7 +4,7 @@
 This repository contains all the work completed during the summer school on the study of charged particle distribution. The primary focus was on the perpendicular side relative to the beam's travel direction.
 
 ## Archived Versions
-- [Version v1.0.0 10.5281/zenodo.8322384](<https://zenodo.org/record/8322384>)
+- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8350483.svg)](https://doi.org/10.5281/zenodo.8350483)
   
 ## Dependencies:
 - **PyPIC:** The main package used for various particle-in-cell operations.
